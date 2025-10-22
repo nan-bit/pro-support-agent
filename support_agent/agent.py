@@ -1,7 +1,7 @@
 # agent.py
 from google.adk.agents import LlmAgent
 from google.adk.events import Event
-from support_agent_app.tools import check_order_status, cancel_order, return_order, get_product_details, get_customer_info, update_product_inventory
+from support_agent.tools import check_order_status, cancel_order, return_order, get_product_details, get_customer_info, update_product_inventory
 
 class SupportAgent(LlmAgent):
     """A customer support agent that uses tools to handle order inquiries."""
