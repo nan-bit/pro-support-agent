@@ -1,69 +1,81 @@
 # tools.py
-# A simple in-memory database for the demo
-_ORDERS = {
-    "12345": {"status": "Shipped", "items": ["ADK T-Shirt"]},
-    "67890": {"status": "Processing", "items": ["Gemini Mug"]},
-}
+import os
+import shopify
+from dotenv import load_dotenv
+load_dotenv()
 
-_PRODUCTS = {
-    "P101": {"name": "Gemini T-Shirt", "price": 25.00, "inventory": 100},
-    "P102": {"name": "ADK Hoodie", "price": 45.00, "inventory": 50},
-}
+# --- Shopify API Connection Setup ---
+shop_url = os.getenv("SHOPIFY_SHOP_URL")
+api_version = os.getenv("SHOPIFY_API_VERSION")
+access_token = os.getenv("SHOPIFY_API_ACCESS_TOKEN")
 
-_CUSTOMERS = {
-    "C001": {"name": "Alice Smith", "email": "alice@example.com"},
-    "C002": {"name": "Bob Johnson", "email": "bob@example.com"},
-}
+if not all([shop_url, api_version, access_token]):
+    raise ValueError("Shopify credentials are not fully set in the .env file.")
 
-def check_order_status(order_id: str) -> str:
-    """Checks the status of a given order ID."""
-    print(f"Tool: Checking status for order {order_id}")
-    return _ORDERS.get(order_id, {}).get("status", "Order not found")
+# Activate the Shopify API session
+session = shopify.Session(shop_url, api_version, access_token)
+shopify.ShopifyResource.activate_session(session)
+# ------------------------------------
 
-def cancel_order(order_id: str) -> str:
-    """Cancels an order if it has not yet been shipped."""
-    print(f"Tool: Attempting to cancel order {order_id}")
-    order = _ORDERS.get(order_id)
-    if not order:
-        return "Order not found."
-    if order["status"] == "Shipped":
-        return "Cannot cancel order, it has already been shipped."
-    order["status"] = "Cancelled"
-    return "Order has been successfully cancelled."
+def check_order_status(order_number: str) -> str:
+    """Checks the financial and fulfillment status of a Shopify order by its number (e.g., #1001)."""
+    print(f"Tool: Searching for Shopify order number {order_number}")
+    try:
+        # The 'name' field in the Shopify API corresponds to the order number like #1001
+        orders = shopify.Order.find(name=order_number)
+        if not orders:
+            return f"Order {order_number} not found."
+        
+        order = orders[0] # Get the first result
+        return (f"Status for Order {order.name}: "
+                f"Financial Status is '{order.financial_status}', "
+                f"Fulfillment Status is '{order.fulfillment_status}'.")
+    except Exception as e:
+        return f"An error occurred while fetching order status: {e}"
+    finally:
+        shopify.ShopifyResource.clear_session()
 
-def return_order(order_id: str) -> str:
-    """Initiates a return for a shipped order."""
-    print(f"Tool: Initiating return for order {order_id}")
-    order = _ORDERS.get(order_id)
-    if not order:
-        return "Order not found."
-    if order["status"] != "Shipped":
-        return "Cannot initiate a return for an order that has not been shipped."
-    return "Return initiated. Please check your email for a shipping label."
+def get_product_details(item_id: str) -> str:
+    """Retrieves details for a product, accepting either a Product ID or a Variant ID."""
+    print(f"Tool: Getting details for Shopify item ID {item_id}")
+    try:
+        # First, try to find it as a Product
+        product = shopify.Product.find(item_id)
+        if product:
+            return (f"Product Found: '{product.title}'. "
+                    f"Status: {product.status}, Vendor: {product.vendor}, Type: {product.product_type}.")
 
-def get_product_details(product_id: str) -> str:
-    """Retrieves details for a specific product by its ID."""
-    print(f"Tool: Getting details for product {product_id}")
-    product = _PRODUCTS.get(product_id)
-    if not product:
-        return "Product not found."
-    return f"Product Name: {product['name']}, Price: ${product['price']:.2f}, Inventory: {product['inventory']}"
+    except Exception:
+        # If it fails, it might be a Variant ID. Let's try that.
+        print(f"Tool: Could not find Product with ID {item_id}. Trying as a Variant ID.")
+        try:
+            variant = shopify.Variant.find(item_id)
+            if variant:
+                # If we find a variant, we can get the parent product's info
+                product = shopify.Product.find(variant.product_id)
+                return (f"Found Variant '{variant.title}' which belongs to Product '{product.title}'. "
+                        f"Product Status: {product.status}, Vendor: {product.vendor}, Type: {product.product_type}.")
+        except Exception:
+            # If both fail, then it truly can't be found.
+            pass
+
+    return f"Could not find any product or variant with the ID {item_id}."
 
 def get_customer_info(customer_id: str) -> str:
-    """Retrieves customer information by customer ID."""
-    print(f"Tool: Getting info for customer {customer_id}")
-    customer = _CUSTOMERS.get(customer_id)
-    if not customer:
-        return "Customer not found."
-    return f"Customer Name: {customer['name']}, Email: {customer['email']}"
+    """Retrieves customer information by their unique customer ID."""
+    print(f"Tool: Getting info for Shopify customer ID {customer_id}")
+    try:
+        customer = shopify.Customer.find(customer_id)
+        if not customer:
+            return f"Customer with ID {customer_id} not found."
+        
+        return (f"Customer Found: {customer.first_name} {customer.last_name}, "
+                f"Email: {customer.email}, Total Orders: {customer.orders_count}.")
+    except Exception as e:
+        return f"An error occurred while fetching customer info: {e}"
+    finally:
+        shopify.ShopifyResource.clear_session()
 
-def update_product_inventory(product_id: str, quantity: int) -> str:
-    """Updates the inventory level for a specific product."""
-    print(f"Tool: Updating inventory for product {product_id} to {quantity}")
-    product = _PRODUCTS.get(product_id)
-    if not product:
-        return "Product not found."
-    if quantity < 0:
-        return "Inventory quantity cannot be negative."
-    product['inventory'] = quantity
-    return f"Inventory for {product['name']} updated to {quantity}."
+# Note: The tool functions for cancel_order, return_order, and update_product_inventory
+# would require 'write' permissions (e.g., write_orders) and are more complex.
+# We are focusing on the 'read' functions for this demo.

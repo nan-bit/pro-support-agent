@@ -1,7 +1,7 @@
 # agent.py
 from google.adk.agents import LlmAgent
 from google.adk.events import Event
-from support_agent.tools import check_order_status, cancel_order, return_order, get_product_details, get_customer_info, update_product_inventory
+from support_agent.tools import check_order_status, get_product_details, get_customer_info
 
 class SupportAgent(LlmAgent):
     """A customer support agent that uses tools to handle order inquiries."""
@@ -26,21 +26,11 @@ root_agent = SupportAgent(
     model="gemini-pro-latest",
 
             tools=[
-
                 check_order_status,
-
-                cancel_order,
-
-                return_order,
-
                 get_product_details,
-
                 get_customer_info,
-
-                update_product_inventory,
-
             ],
 
-    instruction="You are a helpful customer support agent for an e-commerce store. Use the provided tools to check order statuses, cancel orders, initiate returns, get product details, retrieve customer information, and update product inventory. Always ask for the necessary IDs (order, product, customer) when performing an action."
+    instruction="You are a helpful customer support agent for an e-commerce store. Use the provided tools to check order statuses, get product details and retrieve customer information. Always ask for the necessary IDs (order, product, customer) when performing an action."
 
 )
