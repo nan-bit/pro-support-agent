@@ -1,7 +1,15 @@
-# agent.py
+# support_agent/agent.py
+
 from google.adk.agents import LlmAgent
 from google.adk.events import Event
-from support_agent.tools import check_order_status, get_product_details, get_customer_info
+from support_agent.tools import (
+    get_order_status,
+    get_product_details,
+    get_customer_info,
+    get_all_collections,
+    get_products_in_collection,
+    create_checkout_link
+)
 
 class SupportAgent(LlmAgent):
     """A customer support agent that uses tools to handle order inquiries."""
@@ -25,12 +33,22 @@ root_agent = SupportAgent(
 
     model="gemini-pro-latest",
 
-            tools=[
-                check_order_status,
-                get_product_details,
-                get_customer_info,
-            ],
+    # Provide the agent with its complete set of tools
+    tools=[
+        get_order_status,
+        get_product_details,
+        get_customer_info,
+        get_all_collections,
+        get_products_in_collection,
+        create_checkout_link,
+    ],
 
-    instruction="You are a helpful customer support agent for an e-commerce store. Use the provided tools to check order statuses, get product details and retrieve customer information. Always ask for the necessary IDs (order, product, customer) when performing an action."
-
+    # Give the agent a comprehensive set of instructions for all its capabilities
+    instruction=(
+        "You are a helpful and friendly customer support agent for an e-commerce store. "
+        "Your primary goal is to assist customers by using the provided tools. "
+        "You can check order statuses, look up product details, find customer information, and list products in a collection. "
+        "You can also help customers make a purchase by using the `create_checkout_link` tool. "
+        "Always be clear and confirm necessary details like IDs (order, product, customer) before taking action."
+    )
 )
