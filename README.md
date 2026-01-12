@@ -1,24 +1,23 @@
 # Gemini Pro Customer Support Agent
 
-This project demonstrates an advanced customer support agent built using the Google Agent Development Kit (ADK) and powered by the Gemini Pro model. The agent is designed for a Shopify-based e--commerce platform and can handle a wide variety of customer inquiries by using a set of predefined tools that interact with both the Shopify and Stripe APIs.
+This project demonstrates an advanced customer support agent built using the Google Agent Development Kit (ADK) and powered by the Gemini Pro model. The agent is designed for a Shopify-based e--commerce platform and can handle a wide variety of customer inquiries by using a set of predefined tools that interact with the Shopify API.
 
 ## Features
 
-The support agent can perform the following actions by interacting with Shopify and Stripe APIs:
+The support agent can perform the following actions by interacting with the Shopify API:
 - **Check Order Status:** Provide the current financial and fulfillment status of a Shopify order.
 - **Get Product Details:** Retrieve information about a product, including its variants and IDs.
 - **Retrieve Customer Information:** Look up a customer's name, email, and total order count.
 - **Browse Product Collections:** List all available product collections and show the products within a specific collection.
 - **Create Checkout Links:** Help customers purchase an item by generating a secure Shopify checkout link for a specific product.
-- **Check Payment Details (Stripe):** Retrieve payment status, amount, and payment method for an order processed through Stripe.
-- **Process Refunds (Stripe):** Issue full or partial refunds for an order directly via the Stripe API.
+
 
 ## Prerequisites
 
 - Python 3.8+
 - An active Google Gemini API key.
 - A Shopify store with Admin API access credentials.
-- A Stripe account with API access keys, used as the payment processor in the Shopify store.
+
 
 ## Setup and Installation
 
@@ -61,7 +60,7 @@ You need to create a `.env` file to store your API keys and credentials securely
   SHOPIFY_SHOP_URL="your-store-name.myshopify.com"
   SHOPIFY_API_VERSION="YYYY-MM"
   SHOPIFY_API_ACCESS_TOKEN="your-admin-api-access-token"
-  STRIPE_API_KEY="sk_test_YOUR_STRIPE_SECRET_KEY"
+
   ```
 - Replace the placeholder values with your actual credentials and save the file.
 
@@ -132,5 +131,5 @@ venv/bin/python tests/manual_live_test.py
     └── .env          # (To be created) Stores API keys and credentials
 ```
 - **`agent.py`**: Initializes the `LlmAgent`, defines its model, tools, and instructions.
-- **`tools.py`**: Contains all the functions that the agent can call to interact with the Shopify store's data and process payments with Stripe.
+- **`tools.py`**: Contains all the functions that the agent can call to interact with the Shopify store's data.
 - **`requirements.txt`**: Lists the Python dependencies for the project.
