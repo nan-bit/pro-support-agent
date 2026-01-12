@@ -98,6 +98,28 @@ http://127.0.0.1:8000
 
 You can now interact with the customer support agent through the chat interface.
 
+
+## Testing
+
+This project includes both unit tests and E2E tests.
+
+**1. Run Unit Tests**
+```bash
+venv/bin/python -m unittest tests/test_tools.py
+```
+
+**2. Run Mocked E2E Tests**
+This verifies the agent's logic without hitting external APIs.
+```bash
+venv/bin/python -m unittest tests/test_agent_mock.py
+```
+
+**3. Run Live Manual Test**
+This requires a valid `.env` file and will make real API calls (read-only).
+```bash
+venv/bin/python tests/manual_live_test.py
+```
+
 ## Project Structure
 ```
 .

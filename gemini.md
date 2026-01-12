@@ -69,15 +69,9 @@ class SupportAgent(LlmAgent):
         super().__init__(**kwargs)
         print("SupportAgent initialized.")
 
-    def perceive(self, event: Event) -> None:
-        """Receives an event from the user and adds it to the conversation history."""
-        self.add_event_to_history(event)
+    # The agent's logic is now handled by the ADK Runner
+    # No need to manually define perceive/act methods unless customizing behavior
 
-    def act(self) -> Event:
-        """Calls the LLM to generate a response based on the conversation history."""
-        response_event = self.llm.generate_content(self.history)
-        self.add_event_to_history(response_event)
-        return response_event
 
 root_agent = SupportAgent(
 
